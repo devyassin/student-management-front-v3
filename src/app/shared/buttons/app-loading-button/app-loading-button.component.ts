@@ -3,11 +3,10 @@ import { Component, Input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-app-loading-button',
-  standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule],
-  templateUrl: './app-loading-button.component.html',
-  styleUrl: './app-loading-button.component.css',
+    selector: 'app-app-loading-button',
+    imports: [CommonModule, MatProgressSpinnerModule],
+    templateUrl: './app-loading-button.component.html',
+    styleUrl: './app-loading-button.component.css'
 })
 export class LoadingButtonComponent {
   @Input() loading = false;
