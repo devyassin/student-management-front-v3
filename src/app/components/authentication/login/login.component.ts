@@ -44,7 +44,7 @@ export class LoginComponent {
       next: (response) => {
         localStorage.setItem('token', response.token);
         this.toastr.success('Welcome!');
-        // this.router.navigate(['/dashboard/upload']);
+        this.router.navigate(['/dashboard/students']);
       },
       error: (err) => {
         this.toastr.error('Login Faild !');

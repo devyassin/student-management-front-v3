@@ -4,31 +4,18 @@
       <div class="flex">
         <div class="flex-shrink-0 flex items-center">
           <i class="fas fa-graduation-cap text-3xl text-gray-800">STD</i>
-
         </div>
         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-          <a
-            routerLink="//dashboard/stats"
-            routerLinkActive="border-indigo-500 text-gray-900"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-          >
-            Students
-          </a>
-          <a
-            [routerLink]="['/dashboard/upload']"
-            routerLinkActive="border-indigo-500 text-gray-900"
-            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-          >
-            Grades
-          </a>
-          <a
-            [routerLink]="['/dashboard/cards']"
-            routerLinkActive="border-indigo-500 text-gray-900"
-            class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-          >
-            Courses
-          </a>
+          <ng-container *ngFor="let route of filteredRoutes">
+            <a
+              [routerLink]="[route.path]"
+              routerLinkActive=" text-gray-900 border-gray-400 "
+              [routerLinkActiveOptions]="{ exact: route.exact || false }"
+              class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+            >
+              {{ route.label }}
+            </a>
+          </ng-container>
         </div>
       </div>
       <div class="flex items-center">
@@ -57,44 +44,16 @@
   </div>
 
   <!-- Mobile menu -->
-  <div class="sm:hidden">
-    <div class="pt-2 pb-3 space-y-1">
+  <div class="sm:hidden pt-2 pb-3 space-y-1">
+    <ng-container *ngFor="let route of filteredRoutes">
       <a
-        routerLink="/"
+        [routerLink]="[route.path]"
         routerLinkActive="bg-indigo-50 border-indigo-500 text-indigo-700"
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="{ exact: route.exact || false }"
         class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
       >
-        Dashboard
+        {{ route.label }}
       </a>
-      <a
-        routerLink="/dashboard/upload"
-        routerLinkActive="bg-indigo-50 border-indigo-500 text-indigo-700"
-        class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-      >
-        Upload
-      </a>
-      <a
-        routerLink="/dashboard/cards"
-        routerLinkActive="bg-indigo-50 border-indigo-500 text-indigo-700"
-        class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-      >
-        CIN
-      </a>
-      <a
-        routerLink="/validation"
-        routerLinkActive="bg-indigo-50 border-indigo-500 text-indigo-700"
-        class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-      >
-        Validation
-      </a>
-      <a
-        routerLink="/history"
-        routerLinkActive="bg-indigo-50 border-indigo-500 text-indigo-700"
-        class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium"
-      >
-        History
-      </a>
-    </div>
+    </ng-container>
   </div>
 </nav>

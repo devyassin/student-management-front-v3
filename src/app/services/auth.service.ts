@@ -24,8 +24,8 @@ export class AuthService {
         tap((response) => {
           const token = response.token;
           localStorage.setItem('token', token);
-
           this.setAuthToken(token);
+          this.loadUserProfile();
         }),
         catchError((error) => {
           return throwError(
@@ -54,14 +54,15 @@ export class AuthService {
 
   getProfile(): Observable<User> {
     return this.http.get<User>(`${this.API_URL}/profile`).pipe(
-      tap((response: User) => {
-        console.log('Profile retrieved:', response);
+      tap((user: User) => {
+        console.log('Profile retrieved:', user);
+        localStorage.setItem('user', JSON.stringify(user));
       }),
-      catchError((error) => {
-        return throwError(
+      catchError((error) =>
+        throwError(
           () => new Error(error.error?.message || 'Failed to get profile')
-        );
-      })
+        )
+      )
     );
   }
 
@@ -71,7 +72,8 @@ export class AuthService {
       .pipe(
         tap((response: { message: string }) => {
           console.log('Logout successful:', response);
-          localStorage.removeItem('token'); // Remove token on logout
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
         }),
         catchError((error) => {
           return throwError(
@@ -79,5 +81,14 @@ export class AuthService {
           );
         })
       );
+  }
+
+  getUser(): User | null {
+    const userData = localStorage.getItem('user');
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  loadUserProfile(): void {
+    this.getProfile().subscribe();
   }
 }
