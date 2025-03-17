@@ -17,6 +17,11 @@ export interface RegisterCredentials {
   roles: string[];
 }
 
+export interface RegisterResponse {
+  message: string;
+  user: User;
+}
+
 export interface AuthState {
   user: User | null;
   token: string | null;

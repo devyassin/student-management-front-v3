@@ -2,7 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment.development';
 import { catchError, Observable, tap, throwError } from 'rxjs';
-import { LoginCredentials } from '../models/user.model';
+import {
+  LoginCredentials,
+  RegisterCredentials,
+  RegisterResponse,
+  User,
+} from '../models/user.model';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +17,7 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(credentials: LoginCredentials): Observable<any> {
+  login(credentials: LoginCredentials): Observable<{ token: string }> {
     return this.http
       .post<{ token: string }>(`${this.API_URL}/login`, credentials)
       .pipe(
@@ -32,5 +37,47 @@ export class AuthService {
 
   private setAuthToken(token: string) {
     localStorage.setItem('token', token);
+  }
+
+  register(credentials: RegisterCredentials): Observable<RegisterResponse> {
+    return this.http
+      .post<RegisterResponse>(`${this.API_URL}/register`, credentials)
+      .pipe(
+        tap((response) => {}),
+        catchError((error) => {
+          return throwError(
+            () => new Error(error.error?.message || 'Registration failed')
+          );
+        })
+      );
+  }
+
+  getProfile(): Observable<User> {
+    return this.http.get<User>(`${this.API_URL}/profile`).pipe(
+      tap((response: User) => {
+        console.log('Profile retrieved:', response);
+      }),
+      catchError((error) => {
+        return throwError(
+          () => new Error(error.error?.message || 'Failed to get profile')
+        );
+      })
+    );
+  }
+
+  logout(): Observable<{ message: string }> {
+    return this.http
+      .post<{ message: string }>(`${this.API_URL}/logout`, {})
+      .pipe(
+        tap((response: { message: string }) => {
+          console.log('Logout successful:', response);
+          localStorage.removeItem('token'); // Remove token on logout
+        }),
+        catchError((error) => {
+          return throwError(
+            () => new Error(error.error?.message || 'Logout failed')
+          );
+        })
+      );
   }
 }
