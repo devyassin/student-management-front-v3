@@ -10,7 +10,7 @@ export class RoleGuard implements CanActivate {
   constructor(private authService: AuthService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
-    const currentUser: User | null = this.authService.getUser(); 
+    const currentUser: User | null = this.authService.getUser();
 
     if (!currentUser) {
       this.router.navigate(['/login']);
@@ -18,6 +18,7 @@ export class RoleGuard implements CanActivate {
     }
 
     const requiredRoles: string[] = route.data['roles'];
+    console.log(requiredRoles);
     if (
       !requiredRoles ||
       requiredRoles.some((role) => currentUser.roles.includes(role))
@@ -25,7 +26,7 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/login']);
     return false;
   }
 }

@@ -72,7 +72,7 @@ export class NavbarComponent implements OnInit {
       Swal.fire('Logout!', 'U have been logout.', 'success');
 
       localStorage.removeItem('token');
-
+      localStorage.removeItem('user');
       setTimeout(() => {
         this.router.navigate(['/login']);
       }, 1000);
