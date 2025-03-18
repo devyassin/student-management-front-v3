@@ -1,1 +1,216 @@
-<p>students works!</p>
+<div class="p-4">
+  <!-- Toast for notifications -->
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="flex justify-between items-center px-4 py-3">
+        <div class="space-y-1">
+          <h1 class="text-2xl font-bold text-blue-700">Students Management</h1>
+          <p class="text-gray-500">Manage and view all student records</p>
+        </div>
+        <button
+          pButton
+          icon="pi pi-plus"
+          label="Add Student"
+          class="p-button-raised bg-blue-600 hover:bg-blue-700"
+          (click)="openAddDialog()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <!-- Search Bar -->
+    <div class="flex gap-4 mx-4 mb-4">
+      <span class="p-input-icon-left p-input-icon-right flex-1">
+        <i class="pi pi-search"></i>
+        <input
+          type="text"
+          pInputText
+          class="w-full"
+          placeholder="Search students..."
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="searchStudents()"
+        />
+        <i
+          class="pi pi-times cursor-pointer"
+          *ngIf="searchQuery"
+          (click)="searchQuery = ''; getAllStudents()"
+        ></i>
+      </span>
+      <button
+        pButton
+        type="button"
+        label="Search"
+        class="p-button-outlined"
+        (click)="searchStudents()"
+      ></button>
+    </div>
+
+    <p-divider class="m-0"></p-divider>
+
+    <!-- Students Table with fixed height and scrollable -->
+    <div class="mx-4 mb-4">
+      <p-table
+        [value]="students"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[5, 10, 25]"
+        [loading]="loading"
+        styleClass="p-datatable-gridlines p-datatable-striped"
+        [tableStyle]="{ 'min-width': '50rem' }"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} students"
+        [scrollable]="true"
+        scrollHeight="400px"
+      >
+        <ng-template pTemplate="header">
+          <tr class="bg-gray-100">
+            <th pSortableColumn="firstName" class="bg-gray-100">
+              First Name <p-sortIcon field="firstName"></p-sortIcon>
+            </th>
+            <th pSortableColumn="lastName" class="bg-gray-100">
+              Last Name <p-sortIcon field="lastName"></p-sortIcon>
+            </th>
+            <th style="width: 250px" class="bg-gray-100">Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-student>
+          <tr class="hover:bg-blue-50">
+            <td>{{ student.firstName }}</td>
+            <td>{{ student.lastName }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button
+                  pButton
+                  label="View"
+                  icon="pi pi-eye"
+                  class="p-button-text p-button-info text-sm"
+                  (click)="getStudentById(student._id)"
+                ></button>
+                <button
+                  pButton
+                  label="Edit"
+                  icon="pi pi-pencil"
+                  class="p-button-text p-button-success text-sm"
+                  (click)="getStudentById(student._id)"
+                ></button>
+                <button
+                  pButton
+                  label="Delete"
+                  icon="pi pi-trash"
+                  class="p-button-text p-button-danger text-sm"
+                  (click)="confirmDelete(student._id)"
+                ></button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3" class="text-center p-4">
+              <div class="flex flex-col items-center py-6">
+                <i class="pi pi-search text-4xl text-gray-400 mb-4"></i>
+                <p class="text-gray-500">No students found</p>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </p-card>
+
+  <!-- Student Details Dialog -->
+  <p-dialog
+    [(visible)]="isDialogVisible"
+    [modal]="true"
+    header="Student Details"
+    [style]="{ width: '450px' }"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="rounded-lg shadow-lg"
+  >
+    <div *ngIf="selectedStudent" class="p-4">
+      <div class="py-2 border-b border-gray-200 flex">
+        <span class="font-semibold text-gray-700 w-1/3">First Name:</span>
+        <span class="text-gray-900 w-2/3">{{ selectedStudent.firstName }}</span>
+      </div>
+      <div class="py-2 border-b border-gray-200 flex">
+        <span class="font-semibold text-gray-700 w-1/3">Last Name:</span>
+        <span class="text-gray-900 w-2/3">{{ selectedStudent.lastName }}</span>
+      </div>
+      <!-- Add more student details as needed -->
+      <div class="flex justify-end mt-6">
+        <button
+          pButton
+          label="Close"
+          icon="pi pi-times"
+          class="p-button-text"
+          (click)="closeDialog()"
+        ></button>
+      </div>
+    </div>
+  </p-dialog>
+
+  <!-- Add Student Dialog -->
+  <p-dialog
+    [(visible)]="isAddDialogVisible"
+    [modal]="true"
+    header="Add New Student"
+    [style]="{ width: '450px' }"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="rounded-lg shadow-lg"
+  >
+    <div class="p-4">
+      <div class="mb-4">
+        <label
+          for="firstName"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >First Name *</label
+        >
+        <input
+          id="firstName"
+          type="text"
+          pInputText
+          [(ngModel)]="newStudent.firstName"
+          class="w-full"
+          required
+        />
+      </div>
+      <div class="mb-4">
+        <label
+          for="lastName"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Last Name *</label
+        >
+        <input
+          id="lastName"
+          type="text"
+          pInputText
+          [(ngModel)]="newStudent.lastName"
+          class="w-full"
+          required
+        />
+      </div>
+      <!-- Add more fields as needed -->
+
+      <div class="flex justify-end gap-2 mt-6">
+        <button
+          pButton
+          label="Cancel"
+          icon="pi pi-times"
+          class="p-button-text"
+          (click)="closeAddDialog()"
+        ></button>
+        <button
+          pButton
+          label="Save"
+          icon="pi pi-check"
+          class="p-button-raised bg-blue-600 hover:bg-blue-700"
+          (click)="createStudent()"
+        ></button>
+      </div>
+    </div>
+  </p-dialog>
+</div>

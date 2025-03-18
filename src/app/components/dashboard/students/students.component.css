@@ -1,0 +1,153 @@
+.student-container {
+  padding: 1rem;
+  font-family: var(--font-family);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.title-section h1 {
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.title-section p {
+  margin: 0;
+  color: var(--text-color-secondary);
+}
+
+.search-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.search-container .p-input-icon-left {
+  width: 100%;
+}
+
+.search-container input {
+  width: 100%;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.action-button {
+  margin-right: 0;
+  padding: 0.5rem;
+}
+
+.empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-secondary);
+}
+
+.student-details {
+  padding: 1rem 0;
+}
+
+.detail-row {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--surface-200);
+  padding-bottom: 0.5rem;
+}
+
+.detail-label {
+  font-weight: 600;
+  width: 40%;
+  color: var(--text-color-secondary);
+}
+
+.detail-value {
+  width: 60%;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.add-student-form {
+  padding: 1rem 0;
+}
+
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+/* PrimeNG theme overrides */
+:host ::ng-deep {
+  .p-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .p-card .p-card-content {
+    padding: 0;
+  }
+
+  .p-datatable .p-datatable-header {
+    background: var(--surface-100);
+  }
+
+  .p-datatable .p-paginator {
+    border-radius: 0 0 12px 12px;
+  }
+
+  .p-button {
+    border-radius: 6px;
+  }
+
+  /* Custom styling for action buttons */
+  .p-button.action-button {
+    font-size: 0.85rem;
+    margin-right: 0.25rem;
+    transition: background-color 0.2s;
+  }
+
+  .p-button.p-button-info.action-button:hover {
+    background-color: rgba(var(--info-rgb), 0.1);
+  }
+
+  .p-button.p-button-success.action-button:hover {
+    background-color: rgba(var(--success-rgb), 0.1);
+  }
+
+  .p-button.p-button-danger.action-button:hover {
+    background-color: rgba(var(--danger-rgb), 0.1);
+  }
+
+  .student-dialog .p-dialog-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .student-dialog .p-dialog-content {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+}
