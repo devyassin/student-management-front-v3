@@ -20,9 +20,9 @@ export class StudentsService {
     return this.http.get<Student>(`${this.API_URL}/${id}`);
   }
 
-  searchStudent(queryParams: any): Observable<Student[]> {
+  searchStudent(query: string): Observable<Student[]> {
     return this.http.get<Student[]>(`${this.API_URL}/search`, {
-      params: queryParams,
+      params: { firstName: query },
     });
   }
 

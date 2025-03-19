@@ -34,6 +34,7 @@ import { DividerModule } from 'primeng/divider';
 })
 export class StudentsComponent implements OnInit {
   students: Student[] = [];
+  filteredStudents: Student[] = []; // New property to store filtered students
   selectedStudent: Student | undefined;
   errorMessage: string = '';
   isDialogVisible: boolean = false;
@@ -57,6 +58,7 @@ export class StudentsComponent implements OnInit {
     this.studentService.getAllStudents().subscribe({
       next: (data) => {
         this.students = data;
+        this.filteredStudents = [...this.students]; // Initialize filtered students with all students
         this.loading = false;
       },
       error: (error) => {
@@ -80,24 +82,21 @@ export class StudentsComponent implements OnInit {
     });
   }
 
+  // Modified to filter the local array instead of calling the endpoint
   searchStudents(): void {
     if (!this.searchQuery.trim()) {
-      this.getAllStudents();
+      this.filteredStudents = [...this.students];
       return;
     }
 
-    this.loading = true;
-    this.studentService.searchStudent(this.searchQuery).subscribe({
-      next: (data) => {
-        this.students = data;
-        this.loading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Search failed';
-        this.showError(this.errorMessage);
-        this.loading = false;
-      },
-    });
+    const query = this.searchQuery.toLowerCase().trim();
+    console.log(query);
+    this.filteredStudents = this.students.filter(
+      (student) =>
+        student.firstName?.toLowerCase().includes(query) ||
+        student.lastName?.toLowerCase().includes(query) ||
+        (student._id && student._id.toLowerCase().includes(query))
+    );
   }
 
   openAddDialog(): void {
@@ -114,6 +113,7 @@ export class StudentsComponent implements OnInit {
     this.studentService.createStudent(this.newStudent).subscribe({
       next: (response) => {
         this.students.push(response.student);
+        this.filteredStudents = [...this.students]; // Update filtered students
         this.isAddDialogVisible = false;
         this.showSuccess('Student created successfully');
       },
@@ -128,6 +128,9 @@ export class StudentsComponent implements OnInit {
     this.studentService.updateStudent(id, student).subscribe({
       next: (response) => {
         this.students = this.students.map((s) =>
+          s._id === id ? response.student : s
+        );
+        this.filteredStudents = this.filteredStudents.map((s) =>
           s._id === id ? response.student : s
         );
         this.showSuccess('Student updated successfully');
@@ -154,6 +157,9 @@ export class StudentsComponent implements OnInit {
     this.studentService.deleteStudent(id).subscribe({
       next: () => {
         this.students = this.students.filter((s) => s._id !== id);
+        this.filteredStudents = this.filteredStudents.filter(
+          (s) => s._id !== id
+        );
         this.showSuccess('Student deleted successfully');
       },
       error: (error) => {
@@ -161,6 +167,11 @@ export class StudentsComponent implements OnInit {
         this.showError(this.errorMessage);
       },
     });
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.filteredStudents = [...this.students];
   }
 
   closeDialog(): void {
