@@ -6,7 +6,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -39,9 +39,11 @@ export class StudentsComponent implements OnInit {
   errorMessage: string = '';
   isDialogVisible: boolean = false;
   isAddDialogVisible: boolean = false;
+  isUpdateDialogVisible: boolean = false;
   loading: boolean = false;
   searchQuery: string = '';
   newStudent: Partial<Student> = {};
+  updatedStudent: Partial<Student> = {};
 
   constructor(
     private studentService: StudentsService,
@@ -58,7 +60,7 @@ export class StudentsComponent implements OnInit {
     this.studentService.getAllStudents().subscribe({
       next: (data) => {
         this.students = data;
-        this.filteredStudents = [...this.students]; // Initialize filtered students with all students
+        this.filteredStudents = [...this.students]; 
         this.loading = false;
       },
       error: (error) => {
@@ -69,11 +71,13 @@ export class StudentsComponent implements OnInit {
     });
   }
 
-  getStudentById(id: string): void {
+  getStudentById(id: string, forUpdate: boolean = false): void {
     this.studentService.getStudentById(id).subscribe({
       next: (data) => {
         this.selectedStudent = data;
-        this.isDialogVisible = true;
+        forUpdate
+          ? (this.isUpdateDialogVisible = true)
+          : (this.isDialogVisible = true);
       },
       error: (error) => {
         this.errorMessage = 'Student not found';
@@ -90,7 +94,6 @@ export class StudentsComponent implements OnInit {
     }
 
     const query = this.searchQuery.toLowerCase().trim();
-    console.log(query);
     this.filteredStudents = this.students.filter(
       (student) =>
         student.firstName?.toLowerCase().includes(query) ||
@@ -104,6 +107,23 @@ export class StudentsComponent implements OnInit {
     this.isAddDialogVisible = true;
   }
 
+  openUpdateDialog(student: Student): void {
+    this.selectedStudent = student;
+    // Create a copy of the student data to avoid modifying the original directly
+    this.updatedStudent = {
+      firstName: student.firstName,
+      lastName: student.lastName,
+    };
+    console.log(this.updatedStudent);
+    this.isUpdateDialogVisible = true;
+  }
+
+  onSubmitUpdate(form: NgForm): void {
+    if (form.valid && this.selectedStudent) {
+      this.updateStudent(this.selectedStudent._id, this.updatedStudent);
+      this.closeDialog();
+    }
+  }
   createStudent(): void {
     if (!this.newStudent.firstName || !this.newStudent.lastName) {
       this.showError('Please fill in all required fields');
@@ -175,8 +195,8 @@ export class StudentsComponent implements OnInit {
   }
 
   closeDialog(): void {
-    this.isDialogVisible = false;
-    this.selectedStudent = undefined;
+    this.isUpdateDialogVisible = false;
+    this.updatedStudent = {};
   }
 
   closeAddDialog(): void {

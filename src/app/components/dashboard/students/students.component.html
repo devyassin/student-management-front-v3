@@ -93,7 +93,7 @@
                   label="Edit"
                   icon="pi pi-pencil"
                   class="p-button-text p-button-success text-sm"
-                  (click)="getStudentById(student._id)"
+                  (click)="openUpdateDialog(student)"
                 ></button>
                 <button
                   pButton
@@ -139,7 +139,7 @@
         <span class="font-semibold text-gray-700 w-1/3">Last Name:</span>
         <span class="text-gray-900 w-2/3">{{ selectedStudent.lastName }}</span>
       </div>
-      <!-- Add more student details as needed -->
+
       <div class="flex justify-end mt-6">
         <button
           pButton
@@ -151,7 +151,67 @@
       </div>
     </div>
   </p-dialog>
+  <!-- Student Update Dialog -->
+  <p-dialog
+    [(visible)]="isUpdateDialogVisible"
+    [modal]="true"
+    header="Update Student"
+    [style]="{ width: '450px' }"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="rounded-lg shadow-lg"
+  >
+    <div *ngIf="selectedStudent" class="p-4">
+      <form #studentForm="ngForm" (ngSubmit)="onSubmitUpdate(studentForm)">
+        <div class="mb-3">
+          <label for="firstName" class="block font-semibold text-gray-700 mb-1"
+            >First Name:</label
+          >
+          <input
+            id="firstName"
+            type="text"
+            pInputText
+            class="w-full"
+            name="firstName"
+            [(ngModel)]="updatedStudent.firstName"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="lastName" class="block font-semibold text-gray-700 mb-1"
+            >Last Name:</label
+          >
+          <input
+            id="lastName"
+            type="text"
+            pInputText
+            class="w-full"
+            name="lastName"
+            [(ngModel)]="updatedStudent.lastName"
+            required
+          />
+        </div>
 
+        <div class="flex justify-end mt-6 gap-2">
+          <button
+            pButton
+            type="button"
+            label="Cancel"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="closeDialog()"
+          ></button>
+          <button
+            pButton
+            type="submit"
+            label="Save"
+            icon="pi pi-check"
+            [disabled]="!studentForm.valid"
+          ></button>
+        </div>
+      </form>
+    </div>
+  </p-dialog>
   <!-- Add Student Dialog -->
   <p-dialog
     [(visible)]="isAddDialogVisible"

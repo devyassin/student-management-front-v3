@@ -52,7 +52,7 @@
     <!-- Courses Table with fixed height and scrollable -->
     <div class="mx-4 mb-4">
       <p-table
-        [value]="courses"
+        [value]="filteredCourses"
         [paginator]="true"
         [rows]="10"
         [showCurrentPageReport]="true"
@@ -94,7 +94,7 @@
                   label="Edit"
                   icon="pi pi-pencil"
                   class="p-button-text p-button-success text-sm"
-                  (click)="getCourseById(course._id)"
+                  (click)="openUpdateDialog(course)"
                 ></button>
                 <button
                   pButton
@@ -211,6 +211,66 @@
           (click)="createCourse()"
         ></button>
       </div>
+    </div>
+  </p-dialog>
+  <p-dialog
+    [(visible)]="isUpdateDialogVisible"
+    [modal]="true"
+    header="Update Course"
+    [style]="{ width: '450px' }"
+    [draggable]="false"
+    [resizable]="false"
+    styleClass="rounded-lg shadow-lg"
+  >
+    <div *ngIf="selectedCourse" class="p-4">
+      <form #courseForm="ngForm" (ngSubmit)="onSubmitUpdate(courseForm)">
+        <div class="mb-3">
+          <label for="code" class="block font-semibold text-gray-700 mb-1"
+            >Code:</label
+          >
+          <input
+            id="code"
+            type="text"
+            pInputText
+            class="w-full"
+            name="code"
+            [(ngModel)]="updatedCourse.code"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="name" class="block font-semibold text-gray-700 mb-1"
+            >Name:</label
+          >
+          <input
+            id="name"
+            type="text"
+            pInputText
+            class="w-full"
+            name="name"
+            [(ngModel)]="updatedCourse.name"
+            required
+          />
+        </div>
+
+        <div class="flex justify-end mt-6 gap-2">
+          <button
+            pButton
+            type="button"
+            label="Cancel"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="closeDialog()"
+          ></button>
+          <button
+            pButton
+            type="submit"
+            label="Save"
+            icon="pi pi-check"
+            [disabled]="!courseForm.valid"
+          ></button>
+        </div>
+      </form>
     </div>
   </p-dialog>
 </div>

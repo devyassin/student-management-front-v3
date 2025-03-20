@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CoursesService } from '../../../services/courses.service';
 import { Course } from '../../../models/course.model';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgFor } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -35,12 +35,15 @@ import { DividerModule } from 'primeng/divider';
 export class CoursesComponent implements OnInit {
   courses: Course[] = [];
   selectedCourse: Course | undefined;
+  filteredCourses: Course[] = [];
   errorMessage: string = '';
   isDialogVisible: boolean = false;
   isAddDialogVisible: boolean = false;
   loading: boolean = false;
   searchQuery: string = '';
   newCourse: Partial<Course> = {};
+  isUpdateDialogVisible: boolean = false;
+  updatedCourse: Partial<Course> = {};
 
   constructor(
     private coursesService: CoursesService,
@@ -57,6 +60,7 @@ export class CoursesComponent implements OnInit {
     this.coursesService.getAllCourses().subscribe({
       next: (data) => {
         this.courses = data;
+        this.filteredCourses = [...this.courses];
         this.loading = false;
       },
       error: (error) => {
@@ -67,11 +71,13 @@ export class CoursesComponent implements OnInit {
     });
   }
 
-  getCourseById(id: string): void {
+  getCourseById(id: string, forUpdate: boolean = false): void {
     this.coursesService.getCourseById(id).subscribe({
       next: (data) => {
         this.selectedCourse = data;
-        this.isDialogVisible = true;
+        forUpdate
+          ? (this.isUpdateDialogVisible = true)
+          : (this.isDialogVisible = true);
       },
       error: (error) => {
         this.errorMessage = 'Course not found';
@@ -82,22 +88,17 @@ export class CoursesComponent implements OnInit {
 
   searchCourses(): void {
     if (!this.searchQuery.trim()) {
-      this.getAllCourses();
+      this.filteredCourses = [...this.courses];
       return;
     }
 
-    this.loading = true;
-    // this.coursesService.searchCourse(this.searchQuery).subscribe({
-    //   next: (data) => {
-    //     this.courses = data;
-    //     this.loading = false;
-    //   },
-    //   error: (error) => {
-    //     this.errorMessage = 'Search failed';
-    //     this.showError(this.errorMessage);
-    //     this.loading = false;
-    //   },
-    // });
+    const query = this.searchQuery.toLowerCase().trim();
+    this.filteredCourses = this.courses.filter(
+      (course) =>
+        course.code?.toLowerCase().includes(query) ||
+        course.name?.toLowerCase().includes(query) ||
+        (course._id && course._id.toLowerCase().includes(query))
+    );
   }
 
   openAddDialog(): void {
@@ -114,6 +115,7 @@ export class CoursesComponent implements OnInit {
     this.coursesService.createCourse(this.newCourse).subscribe({
       next: (response) => {
         this.courses.push(response.course);
+        this.filteredCourses = [...this.courses];
         this.isAddDialogVisible = false;
         this.showSuccess('Course created successfully');
       },
@@ -124,11 +126,31 @@ export class CoursesComponent implements OnInit {
     });
   }
 
+  openUpdateDialog(course: Course): void {
+    this.selectedCourse = course;
+    this.updatedCourse = {
+      name: course.name,
+      code: course.code,
+    };
+    console.log(this.updateCourse);
+    this.isUpdateDialogVisible = true;
+  }
+
+  onSubmitUpdate(form: NgForm): void {
+    if (form.valid && this.selectedCourse) {
+      this.updateCourse(this.selectedCourse._id, this.updatedCourse);
+      this.closeDialog();
+    }
+  }
+
   updateCourse(id: string, course: Partial<Course>): void {
     this.coursesService.updateCourse(id, course).subscribe({
       next: (response) => {
         this.courses = this.courses.map((c) =>
           c._id === id ? response.course : c
+        );
+        this.filteredCourses = this.filteredCourses.map((s) =>
+          s._id === id ? response.course : s
         );
         this.showSuccess('Course updated successfully');
       },
@@ -154,6 +176,7 @@ export class CoursesComponent implements OnInit {
     this.coursesService.deleteCourse(id).subscribe({
       next: () => {
         this.courses = this.courses.filter((c) => c._id !== id);
+        this.filteredCourses = this.filteredCourses.filter((s) => s._id !== id);
         this.showSuccess('Course deleted successfully');
       },
       error: (error) => {
@@ -165,12 +188,14 @@ export class CoursesComponent implements OnInit {
 
   closeDialog(): void {
     this.isDialogVisible = false;
+    this.isUpdateDialogVisible = false;
     this.selectedCourse = undefined;
   }
 
   closeAddDialog(): void {
     this.isAddDialogVisible = false;
     this.newCourse = {};
+    this.updatedCourse = {};
   }
 
   showSuccess(message: string): void {
