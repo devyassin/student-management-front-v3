@@ -1,17 +1,23 @@
-import { Component, OnInit } from '@angular/core';
-import { StudentsService } from '../../../services/students.service';
-import { Student } from '../../../models/student.model';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
-import { FormsModule, NgForm } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
+
+import { StudentsService } from '../../../services/students.service';
+import { BaseCrudComponent, BaseEntity } from '../../../shared/base-crud/base-crud.component';
+
+export interface Student extends BaseEntity {
+  firstName?: string;
+  lastName?: string;
+}
 
 @Component({
   selector: 'app-students',
@@ -32,191 +38,21 @@ import { DividerModule } from 'primeng/divider';
   providers: [MessageService, ConfirmationService],
   styleUrl: './students.component.css',
 })
-export class StudentsComponent implements OnInit {
-  students: Student[] = [];
-  filteredStudents: Student[] = []; // New property to store filtered students
-  selectedStudent: Student | undefined;
-  errorMessage: string = '';
-  isDialogVisible: boolean = false;
-  isAddDialogVisible: boolean = false;
-  isUpdateDialogVisible: boolean = false;
-  loading: boolean = false;
-  searchQuery: string = '';
-  newStudent: Partial<Student> = {};
-  updatedStudent: Partial<Student> = {};
+export class StudentsComponent extends BaseCrudComponent<Student> {
+  protected searchFields: (keyof Student)[] = ['firstName', 'lastName'];
+  protected requiredFields: string[] = ['firstName', 'lastName'];
+  
+  // Properly inject the service using the inject function
+  protected override service = inject(StudentsService);
 
-  constructor(
-    private studentService: StudentsService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {}
-
-  ngOnInit(): void {
-    this.getAllStudents();
+  protected getEntityName(plural: boolean = false): string {
+    return plural ? 'Students' : 'Student';
   }
 
-  getAllStudents(): void {
-    this.loading = true;
-    this.studentService.getAllStudents().subscribe({
-      next: (data) => {
-        this.students = data;
-        this.filteredStudents = [...this.students]; 
-        this.loading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Failed to load students';
-        this.showError(this.errorMessage);
-        this.loading = false;
-      },
-    });
-  }
-
-  getStudentById(id: string, forUpdate: boolean = false): void {
-    this.studentService.getStudentById(id).subscribe({
-      next: (data) => {
-        this.selectedStudent = data;
-        forUpdate
-          ? (this.isUpdateDialogVisible = true)
-          : (this.isDialogVisible = true);
-      },
-      error: (error) => {
-        this.errorMessage = 'Student not found';
-        this.showError(this.errorMessage);
-      },
-    });
-  }
-
-  // Modified to filter the local array instead of calling the endpoint
-  searchStudents(): void {
-    if (!this.searchQuery.trim()) {
-      this.filteredStudents = [...this.students];
-      return;
-    }
-
-    const query = this.searchQuery.toLowerCase().trim();
-    this.filteredStudents = this.students.filter(
-      (student) =>
-        student.firstName?.toLowerCase().includes(query) ||
-        student.lastName?.toLowerCase().includes(query) ||
-        (student._id && student._id.toLowerCase().includes(query))
-    );
-  }
-
-  openAddDialog(): void {
-    this.newStudent = {};
-    this.isAddDialogVisible = true;
-  }
-
-  openUpdateDialog(student: Student): void {
-    this.selectedStudent = student;
-    // Create a copy of the student data to avoid modifying the original directly
-    this.updatedStudent = {
+  protected override prepareForUpdate(student: Student): Partial<Student> {
+    return {
       firstName: student.firstName,
-      lastName: student.lastName,
+      lastName: student.lastName
     };
-    console.log(this.updatedStudent);
-    this.isUpdateDialogVisible = true;
-  }
-
-  onSubmitUpdate(form: NgForm): void {
-    if (form.valid && this.selectedStudent) {
-      this.updateStudent(this.selectedStudent._id, this.updatedStudent);
-      this.closeDialog();
-    }
-  }
-  createStudent(): void {
-    if (!this.newStudent.firstName || !this.newStudent.lastName) {
-      this.showError('Please fill in all required fields');
-      return;
-    }
-
-    this.studentService.createStudent(this.newStudent).subscribe({
-      next: (response) => {
-        this.students.push(response.student);
-        this.filteredStudents = [...this.students]; // Update filtered students
-        this.isAddDialogVisible = false;
-        this.showSuccess('Student created successfully');
-      },
-      error: (error) => {
-        this.errorMessage = 'Failed to create student';
-        this.showError(this.errorMessage);
-      },
-    });
-  }
-
-  updateStudent(id: string, student: Partial<Student>): void {
-    this.studentService.updateStudent(id, student).subscribe({
-      next: (response) => {
-        this.students = this.students.map((s) =>
-          s._id === id ? response.student : s
-        );
-        this.filteredStudents = this.filteredStudents.map((s) =>
-          s._id === id ? response.student : s
-        );
-        this.showSuccess('Student updated successfully');
-      },
-      error: (error) => {
-        this.errorMessage = 'Failed to update student';
-        this.showError(this.errorMessage);
-      },
-    });
-  }
-
-  confirmDelete(id: string): void {
-    this.confirmationService.confirm({
-      message: 'Are you sure you want to delete this student?',
-      header: 'Confirm Delete',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.deleteStudent(id);
-      },
-    });
-  }
-
-  deleteStudent(id: string): void {
-    this.studentService.deleteStudent(id).subscribe({
-      next: () => {
-        this.students = this.students.filter((s) => s._id !== id);
-        this.filteredStudents = this.filteredStudents.filter(
-          (s) => s._id !== id
-        );
-        this.showSuccess('Student deleted successfully');
-      },
-      error: (error) => {
-        this.errorMessage = 'Failed to delete student';
-        this.showError(this.errorMessage);
-      },
-    });
-  }
-
-  clearSearch(): void {
-    this.searchQuery = '';
-    this.filteredStudents = [...this.students];
-  }
-
-  closeDialog(): void {
-    this.isUpdateDialogVisible = false;
-    this.updatedStudent = {};
-  }
-
-  closeAddDialog(): void {
-    this.isAddDialogVisible = false;
-    this.newStudent = {};
-  }
-
-  showSuccess(message: string): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: message,
-    });
-  }
-
-  showError(message: string): void {
-    this.messageService.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: message,
-    });
   }
 }

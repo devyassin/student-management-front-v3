@@ -30,12 +30,12 @@
           class="w-full"
           placeholder="Search students..."
           [(ngModel)]="searchQuery"
-          (keyup.enter)="searchStudents()"
+          (keyup.enter)="searchItems()"
         />
         <i
           class="pi pi-times cursor-pointer"
           *ngIf="searchQuery"
-          (click)="searchQuery = ''; getAllStudents()"
+          (click)="searchQuery = ''; getAllItems()"
         ></i>
       </span>
       <button
@@ -43,7 +43,7 @@
         type="button"
         label="Search"
         class="p-button-outlined"
-        (click)="searchStudents()"
+        (click)="searchItems()"
       ></button>
     </div>
 
@@ -52,7 +52,7 @@
     <!-- Students Table with fixed height and scrollable -->
     <div class="mx-4 mb-4">
       <p-table
-        [value]="filteredStudents"
+        [value]="filteredItems"
         [paginator]="true"
         [rows]="10"
         [showCurrentPageReport]="true"
@@ -86,7 +86,7 @@
                   label="View"
                   icon="pi pi-eye"
                   class="p-button-text p-button-info text-sm"
-                  (click)="getStudentById(student._id)"
+                  (click)="getItemById(student._id)"
                 ></button>
                 <button
                   pButton
@@ -130,14 +130,14 @@
     [resizable]="false"
     styleClass="rounded-lg shadow-lg"
   >
-    <div *ngIf="selectedStudent" class="p-4">
+    <div *ngIf="selectedItem" class="p-4">
       <div class="py-2 border-b border-gray-200 flex">
         <span class="font-semibold text-gray-700 w-1/3">First Name:</span>
-        <span class="text-gray-900 w-2/3">{{ selectedStudent.firstName }}</span>
+        <span class="text-gray-900 w-2/3">{{ selectedItem.firstName }}</span>
       </div>
       <div class="py-2 border-b border-gray-200 flex">
         <span class="font-semibold text-gray-700 w-1/3">Last Name:</span>
-        <span class="text-gray-900 w-2/3">{{ selectedStudent.lastName }}</span>
+        <span class="text-gray-900 w-2/3">{{ selectedItem.lastName }}</span>
       </div>
 
       <div class="flex justify-end mt-6">
@@ -161,7 +161,7 @@
     [resizable]="false"
     styleClass="rounded-lg shadow-lg"
   >
-    <div *ngIf="selectedStudent" class="p-4">
+    <div *ngIf="selectedItem" class="p-4">
       <form #studentForm="ngForm" (ngSubmit)="onSubmitUpdate(studentForm)">
         <div class="mb-3">
           <label for="firstName" class="block font-semibold text-gray-700 mb-1"
@@ -173,7 +173,7 @@
             pInputText
             class="w-full"
             name="firstName"
-            [(ngModel)]="updatedStudent.firstName"
+            [(ngModel)]="updatedItem.firstName"
             required
           />
         </div>
@@ -187,7 +187,7 @@
             pInputText
             class="w-full"
             name="lastName"
-            [(ngModel)]="updatedStudent.lastName"
+            [(ngModel)]="updatedItem.lastName"
             required
           />
         </div>
@@ -233,7 +233,7 @@
           id="firstName"
           type="text"
           pInputText
-          [(ngModel)]="newStudent.firstName"
+          [(ngModel)]="newItem.firstName"
           class="w-full"
           required
         />
@@ -248,7 +248,7 @@
           id="lastName"
           type="text"
           pInputText
-          [(ngModel)]="newStudent.lastName"
+          [(ngModel)]="newItem.lastName"
           class="w-full"
           required
         />
@@ -268,7 +268,7 @@
           label="Save"
           icon="pi pi-check"
           class="p-button-raised bg-blue-600 hover:bg-blue-700"
-          (click)="createStudent()"
+          (click)="createItem()"
         ></button>
       </div>
     </div>
