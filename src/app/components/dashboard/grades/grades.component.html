@@ -1,1 +1,86 @@
 <p>grades works!</p>
+<div class="p-4">
+    <!-- Toast for notifications -->
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+  
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="flex justify-between items-center px-4 py-3">
+          <div class="space-y-1">
+            <h1 class="text-2xl font-bold text-blue-700">Grades Management</h1>
+            <p class="text-gray-500">Manage and view all grade records</p>
+          </div>
+          <button
+            pButton
+            icon="pi pi-plus"
+            label="Add Grade"
+            class="p-button-raised bg-blue-600 hover:bg-blue-700"
+            (click)="openAddDialog()"
+          ></button>
+        </div>
+      </ng-template>
+  
+      <!-- Grades Table -->
+      <div class="mx-4 mb-4">
+        <p-table
+          [value]="filteredItems"
+          [paginator]="true"
+          [rows]="10"
+          [showCurrentPageReport]="true"
+          [rowsPerPageOptions]="[5, 10, 25]"
+          [loading]="loading"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} grades"
+          [scrollable]="true"
+          scrollHeight="400px"
+        >
+          <ng-template pTemplate="header">
+            <tr class="bg-gray-100">
+              <th pSortableColumn="student">Student <p-sortIcon field="student"></p-sortIcon></th>
+              <th pSortableColumn="course">Course <p-sortIcon field="course"></p-sortIcon></th>
+              <th pSortableColumn="grade">Grade <p-sortIcon field="grade"></p-sortIcon></th>
+              <th pSortableColumn="date">Date <p-sortIcon field="date"></p-sortIcon></th>
+              <th class="bg-gray-100">Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-grade>
+            <tr class="hover:bg-blue-50">
+              <td>{{ grade.student?.firstName }} {{ grade.student?.lastName }}</td>
+              <td>{{ grade.course?.name || 'No course' }}</td>
+              <td>{{ grade.grade }}</td>
+              <td>{{ grade.date | date:'MMM d, y' }}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button pButton label="Edit" icon="pi pi-pencil" class="p-button-text p-button-success text-sm" (click)="openUpdateDialog(grade)"></button>
+                  <button pButton label="Delete" icon="pi pi-trash" class="p-button-text p-button-danger text-sm" (click)="confirmDelete(grade._id)"></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </p-card>
+  
+    <!-- Add Grade Dialog -->
+    <p-dialog [(visible)]="isAddDialogVisible" [modal]="true" header="Add New Grade" [style]="{ width: '450px' }">
+      <div class="p-4">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700">Student *</label>
+          <p-dropdown [options]="students" optionLabel="name" [(ngModel)]="newItem.student" placeholder="Select a Student"></p-dropdown>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700">Course *</label>
+          <p-dropdown [options]="courses" optionLabel="name" [(ngModel)]="newItem.course" placeholder="Select a Course"></p-dropdown>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700">Grade *</label>
+          <input type="number" pInputText [(ngModel)]="newItem.grade" class="w-full" required />
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+          <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="closeAddDialog()"></button>
+          <button pButton label="Save" icon="pi pi-check" class="p-button-raised bg-blue-600 hover:bg-blue-700" (click)="createItem()"></button>
+        </div>
+      </div>
+    </p-dialog>
+  </div>
+  
